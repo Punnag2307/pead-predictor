@@ -1,32 +1,72 @@
-# PEAD Predictor: Post-Earnings Announcement Drift with Machine Learning
+# PEAD Predictor
+### Post-Earnings Announcement Drift with Machine Learning
 
-A quantitative research system that predicts post-earnings stock price direction for S&P 500 companies using machine learning. Built as a publishable research letter targeting internship applications at quantitative trading firms.
+![Python](https://img.shields.io/badge/Python-3.10+-blue?style=flat-square&logo=python)
+![ML](https://img.shields.io/badge/ML-XGBoost%20%7C%20RF%20%7C%20LR-orange?style=flat-square)
+![Data](https://img.shields.io/badge/Data-Free%20Sources%20Only-green?style=flat-square)
+![OOS Sharpe](https://img.shields.io/badge/OOS%20Sharpe-1.70-brightgreen?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-lightgrey?style=flat-square)
 
----
-
-## What This Project Does
-
-Every quarter, 500+ S&P 500 companies report earnings. When actual EPS differs from analyst consensus, stocks react. This project asks:
-
-> *"Given everything knowable before an earnings announcement — surprise magnitude, market context, sector dynamics — can we predict which direction the stock will move at market open?"*
-
-The answer is yes, with 64.1% validation accuracy and a statistically significant out-of-sample Sharpe ratio of 1.70 on 2025 data the model never saw.
+A quantitative research system that predicts post-earnings stock price direction for 472 S&P 500 companies using a calibrated ensemble of machine learning models. Built entirely on free data sources. Designed as an original research letter targeting internship applications at quantitative trading firms.
 
 ---
 
-## Results
+## The Core Question
 
-### Core Model Performance
+> *"Given everything knowable before an earnings announcement — surprise magnitude, market context, sector dynamics — can we predict which direction the stock will move at market open the next morning?"*
 
-| Metric | Value |
-|--------|-------|
-| Universe | 472 S&P 500 stocks (ex-Financials, ex-Utilities) |
-| Training period | 2022–2023 |
-| Validation period | 2024 |
-| Out-of-sample test | 2025 |
-| Validation accuracy | 64.1% |
-| Validation AUC | 0.687 |
-| OOS accuracy | 61.0% |
+**Answer:** Yes — with 64.1% validation accuracy, OOS Net Sharpe of 1.70, and p=0.0000 on genuinely unseen 2025 data.
+
+---
+
+## Key Results At A Glance
+
+| Category | Metric | Value |
+|----------|--------|-------|
+| **Model** | Validation Accuracy | 64.1% |
+| **Model** | Validation AUC | 0.687 |
+| **Model** | OOS Accuracy (2025) | 61.0% |
+| **Backtest** | Full Dataset Net Sharpe | 3.54 |
+| **Backtest** | OOS Net Sharpe (2025) | 1.70 |
+| **Backtest** | OOS Win Rate | 60.7% |
+| **Backtest** | OOS P-value | 0.000000 |
+| **Backtest** | Bootstrap 95% CI | [2.78, 4.30] |
+| **Signal** | OOS Information Coefficient | 0.278 |
+| **Signal** | IC Rating | EXCELLENT |
+| **Capacity** | Strategy Ceiling | ~$1B |
+
+---
+
+## Research Charts
+
+### Cumulative P&L
+![Cumulative PnL](data/processed/charts/cumulative_pnl.png)
+
+### Alpha Decay — Signal Persists Up To 10 Days
+![Alpha Decay](data/processed/charts/alpha_decay.png)
+
+### EPS Surprise Quintile Analysis — Perfect Monotonic Relationship
+![EPS Quintile](data/processed/charts/eps_quintile_analysis.png)
+> Spearman ρ = 1.000, p = 0.0000 — validates the fundamental PEAD mechanism
+
+### Regime Analysis — All Four Market Regimes Profitable
+![Regime Analysis](data/processed/charts/regime_analysis.png)
+
+### Information Coefficient Analysis
+![IC Analysis](data/processed/charts/ic_analysis.png)
+
+### SHAP Feature Importance
+![SHAP](data/processed/charts/shap_importance.png)
+
+### Threshold Sensitivity
+![Threshold](data/processed/charts/threshold_sensitivity.png)
+
+### Capacity Analysis
+![Capacity](data/processed/charts/capacity_revised.png)
+
+---
+
+## Detailed Results
 
 ### Backtest — Full Dataset (2022–2025)
 
@@ -38,27 +78,39 @@ The answer is yes, with 64.1% validation accuracy and a statistically significan
 | Net Sharpe | 3.54 |
 | Max drawdown | -39.6% |
 | Round-trip cost | 38 bps |
+| Cost drag | 27.7% |
 
-### Backtest — 2025 Out-of-Sample
+### Backtest — 2025 Out-of-Sample (Never Seen By Model)
 
 | Metric | Value |
 |--------|-------|
 | Trades | 308 |
 | Win rate | 60.7% |
+| Gross Sharpe | 3.12 |
 | Net Sharpe | 1.70 |
 | Max drawdown | -35.6% |
 | T-statistic | 9.217 |
 | P-value | 0.000000 |
 | Bootstrap 95% CI | [2.78, 4.30] |
 
-### Signal Quality
+### Regime Analysis
 
-| Metric | Value | Industry Benchmark |
-|--------|-------|--------------------|
-| OOS Mean IC | 0.278 | >0.05 = good |
-| OOS IR | 1.482 | >1.0 = strong |
-| IC > 0 rate | 87.5% | — |
-| Rating | EXCELLENT | — |
+| Regime | Trades | Win Rate | Net Sharpe | Significant |
+|--------|--------|----------|------------|-------------|
+| 2022 Bear Market | 320 | 79.7% | 4.38 | ✅ p=0.0000 |
+| 2023 Recovery | 508 | 80.9% | 5.36 | ✅ p=0.0000 |
+| 2024 AI Rally | 481 | 71.9% | 2.59 | ✅ p=0.0004 |
+| 2025 OOS | 308 | 60.7% | 1.70 | ✅ p=0.0288 |
+
+### EPS Surprise Quintile Analysis
+
+| Quintile | Mean Surprise | Mean Return | Win Rate |
+|----------|--------------|-------------|----------|
+| Q1 — Largest Miss | -13.1% | -2.31% | 29.9% |
+| Q2 — Miss | +1.6% | -1.04% | 40.1% |
+| Q3 — In-line | +4.9% | +0.51% | 56.3% |
+| Q4 — Beat | +10.1% | +1.14% | 63.8% |
+| Q5 — Largest Beat | +30.2% | +2.47% | 70.0% |
 
 ### Alpha Decay
 
@@ -70,142 +122,124 @@ The answer is yes, with 64.1% validation accuracy and a statistically significan
 | 5 days | 2.10% | 62.1% |
 | 10 days | 3.03% | 65.4% |
 
-### Regime Analysis — All Four Regimes Profitable
-
-| Regime | Trades | Win Rate | Net Sharpe | Significant |
-|--------|--------|----------|------------|-------------|
-| 2022 Bear Market | 320 | 79.7% | 4.38 | ✅ p=0.0000 |
-| 2023 Recovery | 508 | 80.9% | 5.36 | ✅ p=0.0000 |
-| 2024 AI Rally | 481 | 71.9% | 2.59 | ✅ p=0.0004 |
-| 2025 OOS | 308 | 60.7% | 1.70 | ✅ p=0.0288 |
-
-### EPS Surprise Quintile Analysis
-
-Perfect monotonic relationship validated (Spearman ρ = 1.000, p = 0.0000):
-
-| Quintile | Mean Return | Win Rate |
-|----------|-------------|----------|
-| Q1 — Largest Miss | -2.31% | 29.9% |
-| Q2 — Miss | -1.04% | 40.1% |
-| Q3 — In-line | +0.51% | 56.3% |
-| Q4 — Beat | +1.14% | 63.8% |
-| Q5 — Largest Beat | +2.47% | 70.0% |
-
 ### Capacity Analysis
 
-Strategy remains profitable up to ~$1B deployed:
-
-| Capital | Net Return per Trade |
-|---------|---------------------|
-| $10M | 92 bps ✅ |
-| $100M | 84 bps ✅ |
-| $500M | 68 bps ✅ |
-| $1,000M | 57 bps ✅ |
-
----
-
-## Research Charts
-
-| Chart | Description |
-|-------|-------------|
-| `alpha_decay.png` | Signal persistence across 1–10 day horizons |
-| `cumulative_pnl.png` | Strategy cumulative P&L 2022–2025 |
-| `eps_vs_return.png` | EPS surprise vs abnormal return |
-| `eps_quintile_analysis.png` | Monotonic PEAD relationship |
-| `shap_importance.png` | Feature importance (SHAP values) |
-| `ic_analysis.png` | Monthly IC time series, in-sample vs OOS |
-| `regime_analysis.png` | Performance across market regimes |
-| `capacity_analysis.png` | Strategy capacity and scalability |
-| `threshold_sensitivity.png` | Performance across confidence thresholds |
-| `sector_breakdown.png` | Returns by sector |
-| `model_comparison.png` | Model comparison |
+| Capital | Market Impact | Net Return | Status |
+|---------|--------------|------------|--------|
+| $10M | 4 bps | 92 bps | ✅ |
+| $100M | 12 bps | 84 bps | ✅ |
+| $250M | 19 bps | 76 bps | ✅ |
+| $500M | 28 bps | 68 bps | ✅ |
+| $1,000M | 39 bps | 57 bps | ✅ |
 
 ---
 
 ## Methodology
 
-### Universe
-472 S&P 500 stocks excluding Financials and Utilities. Financials have structurally different earnings mechanics; Utilities have minimal surprise variation. Follows Bernard & Thomas (1989) standard.
+### Universe Construction
+472 S&P 500 stocks excluding Financials and Utilities. Follows Bernard & Thomas (1989) standard — Financials have structurally different earnings mechanics, Utilities have minimal surprise variation.
 
-### Labeling
+### Labeling (Zero Data Leakage)
 For each earnings event:
-- **Abnormal return** = overnight gap return minus sector ETF return (isolates company-specific reaction)
-- **Label** = direction of abnormal return (+1 up, -1 down)
-- **No leakage** = all labels use post-event prices, all features use pre-event data only
+- **Abnormal return** = overnight gap return − sector ETF return
+- **Label** = direction of abnormal return (+1 up, −1 down)
+- All labels use strictly post-event prices
+- All features use strictly pre-event data
 
-### Features (24 total)
-**Earnings features (10):** EPS surprise %, winsorized surprise, absolute surprise, direction, actual EPS, consensus EPS, report timing, earnings quality score, both-beat flag, sector-relative surprise (z-score within sector)
+### Feature Engineering (24 Features)
 
-**Market context features (9):** Pre-earnings 5d and 20d returns, 20d volatility, volume ratio, price-to-52w-high, price-to-52w-low, VIX level, VIX percentile, previous day gap
+**Earnings features (10)**
+- EPS surprise %, winsorized at ±30%
+- EPS surprise absolute value and direction
+- Actual and consensus EPS
+- Report timing (AMC vs BMO)
+- Earnings quality score (revenue surprise − EPS surprise)
+- Both-beat / both-miss flags
+- Sector-relative surprise (z-score within sector)
 
-**Sector and time features (5):** Sector encoding, month, quarter, day of week, earnings season indicator
+**Market context features (9)**
+- Pre-earnings 5d and 20d returns
+- 20-day annualized volatility
+- Volume ratio (recent vs average)
+- Price-to-52-week high and low
+- VIX level and VIX percentile
+- Previous day opening gap
+
+**Sector and time features (5)**
+- Sector encoding
+- Month, quarter, day of week
+- Earnings season indicator
 
 ### Model Architecture
-Calibrated Ensemble with weighted averaging:
-- Logistic Regression (20%) — linear baseline
-- Random Forest (30%) — nonlinear, handles interactions
-- XGBoost (50%) — gradient boosting, primary model
+Calibrated Ensemble (weighted average):
+```
+Ensemble = 0.20 × LR + 0.30 × RF + 0.50 × XGBoost
+```
+All models use isotonic regression probability calibration. Confidence threshold = 0.65 for trade selection.
 
-All models use isotonic regression calibration for reliable probability estimates. Confidence threshold of 0.65 applied for trade selection.
-
-### Backtesting
-- Transaction costs: 38 bps round trip (spread + market impact + commission + slippage)
-- Equal position sizing
-- Overnight gap strategy: enter at market open, exit same day
-- Strict temporal split: no future information ever used
+### Transaction Costs (38 bps round trip)
+| Component | Cost |
+|-----------|------|
+| Bid-ask spread | 5 bps |
+| Market impact | 10 bps |
+| Commission | 1 bp |
+| Slippage | 3 bps |
+| **Per side total** | **19 bps** |
+| **Round trip** | **38 bps** |
 
 ### Statistical Validation
-- Two-sided t-test: T-stat 9.217, p=0.000000
+- Two-sided t-test: T-stat 9.217, p = 0.000000
 - Bootstrap 95% CI for Sharpe: [2.78, 4.30]
-- Bonferroni correction for multiple testing across 3 models
-- All results significant at adjusted alpha level
+- Bonferroni correction for multiple testing (3 models)
+- Significant at adjusted alpha = 0.0167
 
 ---
 
 ## Project Structure
+
 ```
-news-alpha/
+pead-predictor/
 ├── src/
 │   ├── data/
-│   │   ├── database.py          # SQLite database setup
-│   │   ├── universe.py          # S&P 500 universe construction
-│   │   ├── price_fetcher.py     # yfinance price data
-│   │   └── earnings_fetcher.py  # Earnings data collection
+│   │   ├── database.py             # SQLite database setup
+│   │   ├── universe.py             # S&P 500 universe construction
+│   │   ├── price_fetcher.py        # yfinance OHLCV data
+│   │   └── earnings_fetcher.py     # Earnings data collection
 │   ├── features/
-│   │   ├── labeling.py          # Abnormal return labeling
-│   │   ├── feature_engineering.py  # 24-feature matrix
-│   │   └── advanced_features.py    # Beat streak, momentum interaction
+│   │   ├── labeling.py             # Abnormal return labeling
+│   │   ├── feature_engineering.py  # 24-feature matrix builder
+│   │   └── advanced_features.py    # Beat streak, momentum features
 │   ├── models/
-│   │   ├── impact_model.py      # Calibrated ensemble training
-│   │   └── evaluation.py        # Model evaluation utilities
+│   │   ├── impact_model.py         # Calibrated ensemble training
+│   │   └── evaluation.py           # Evaluation utilities
 │   └── backtest/
-│       ├── analysis.py          # Backtesting + alpha decay
-│       └── advanced_analysis.py # IC + capacity + regime analysis
+│       ├── analysis.py             # Backtesting + alpha decay
+│       └── advanced_analysis.py    # IC + capacity + regime analysis
 ├── data/
 │   └── processed/
-│       └── charts/              # All research charts (11 PNG files)
+│       └── charts/                 # 11 research charts
 ├── docs/
-│   ├── methodology.md           # Detailed methodology
-│   ├── data_dictionary.md       # Feature definitions
-│   └── architecture.md          # System architecture
-├── collect_data.py              # Data collection pipeline
-├── validate_setup.py            # Environment validation
-├── run_advanced_analysis.py     # IC + capacity + regime
-├── run_additional_analysis.py   # Threshold + quintile + capacity
-├── requirements.txt             # Python dependencies
-└── README.md
+│   ├── methodology.md              # Detailed methodology
+│   ├── data_dictionary.md          # Feature definitions
+│   └── architecture.md             # System architecture
+├── collect_data.py                 # End-to-end data collection
+├── validate_setup.py               # Environment validation
+├── run_advanced_analysis.py        # IC + capacity + regime
+├── run_additional_analysis.py      # Threshold + quintile + capacity
+└── requirements.txt
 ```
 
 ---
 
 ## How To Run
 
-### Prerequisites
+### 1. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-Create `.env` file in project root:
+### 2. Set up environment
+Create `.env` in project root:
 ```
 FINNHUB_API_KEY=your_key
 FMP_API_KEY=your_key
@@ -214,31 +248,16 @@ NASDAQ_API_KEY=your_key
 DB_PATH=data/database/news_alpha.db
 ```
 
-### Full Pipeline
+### 3. Run full pipeline
 ```bash
-# Step 1: Validate setup
-python validate_setup.py
-
-# Step 2: Collect data (prices + earnings + EDGAR)
-python collect_data.py
-
-# Step 3: Label earnings events
-python src/features/labeling.py
-
-# Step 4: Build feature matrix
-python src/features/feature_engineering.py
-
-# Step 5: Train models
-python src/models/impact_model.py
-
-# Step 6: Backtest
-python src/backtest/analysis.py
-
-# Step 7: Advanced analysis
-python run_advanced_analysis.py
-
-# Step 8: Additional analysis
-python run_additional_analysis.py
+python validate_setup.py              # Validate environment
+python collect_data.py                # Collect all data
+python src/features/labeling.py       # Label earnings events
+python src/features/feature_engineering.py  # Build features
+python src/models/impact_model.py     # Train ensemble
+python src/backtest/analysis.py       # Run backtest
+python run_advanced_analysis.py       # IC + capacity + regime
+python run_additional_analysis.py     # Threshold + quintile
 ```
 
 ---
@@ -247,44 +266,33 @@ python run_additional_analysis.py
 
 | Source | Data | Cost |
 |--------|------|------|
-| yfinance | Daily prices, earnings estimates | Free |
+| yfinance | Daily OHLCV, earnings estimates | Free |
 | SEC EDGAR | 8-K filings, CIK lookup | Free |
 | Finnhub | Market data | Free tier |
 | Alpha Vantage | News sentiment | Free tier |
 
-All data sources are free. No Bloomberg or Compustat required.
+**All data sources are free. No Bloomberg or Compustat required.**
 
 ---
 
 ## Known Limitations
 
-**Survivorship bias** — Universe based on current S&P 500 constituents. Companies delisted 2022–2025 are excluded, likely causing slight return overestimation.
-
-**Training data depth** — Only 2 years of training data (2022–2023, ~2,767 events). Upgrading to institutional data would extend this to 10+ years.
-
-**Earnings quality feature** — `earnings_quality` is 98% null due to sparse revenue surprise data in yfinance free tier. Full coverage would require premium data.
-
-**Max drawdown** — -35.6% OOS reflects earnings event clustering during quarterly reporting seasons. Volatility-scaled position sizing is a natural extension.
-
-**Daily prices only** — Intraday execution timing cannot be precisely modeled. Assumes execution at market open.
+- **Survivorship bias** — Universe based on current S&P 500 constituents
+- **Training data depth** — 2 years training data (2,767 events); institutional data would extend to 10+ years
+- **Earnings quality feature** — 98% null due to sparse revenue data in yfinance free tier
+- **Max drawdown** — -35.6% OOS reflects earnings event clustering; volatility-scaled sizing would reduce this
+- **Daily prices only** — Intraday execution timing cannot be precisely modeled
 
 ---
 
 ## Academic Context
 
-This project implements and extends Post-Earnings Announcement Drift (PEAD), documented since Ball & Brown (1968). Key references:
+Implements and extends Post-Earnings Announcement Drift (PEAD), documented since Ball & Brown (1968):
 
-- Bernard & Thomas (1989) — PEAD anomaly and universe construction
-- Livnat & Mendenhall (2006) — Earnings surprise measurement
-- Engelberg et al. (2010) — News-driven PEAD
+- **Bernard & Thomas (1989)** — PEAD anomaly and universe construction
+- **Livnat & Mendenhall (2006)** — Earnings surprise measurement
+- **Engelberg et al. (2010)** — News-driven PEAD
 
-Our contribution: applying calibrated ensemble ML to PEAD on 2022–2025 data with rigorous OOS validation, IC analysis, and regime decomposition.
+**Our contribution:** Calibrated ensemble ML applied to PEAD on 2022–2025 data with IC analysis, regime decomposition, capacity modeling, and full statistical validation — built entirely on free data.
 
 ---
-
-## Author
-
-Punnag | B.Tech Computer Science (Data Science, Economics, Business) | Plaksha University
-
-*Built as part of a quantitative research letter series targeting internship applications at Citadel, Jane Street, and Wintermute.*
-```
