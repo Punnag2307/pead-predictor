@@ -1,0 +1,44 @@
+# Environment and secrets
+.env
+*.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Data files (too large for GitHub)
+data/database/
+data/raw/
+data/processed/*.csv
+data/processed/*.json
+data/collection_progress.json
+data/benzinga_progress.json
+
+# Keep charts
+!data/processed/charts/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Anaconda
+*.egg-info/
+dist/
+build/
+
+# Model artifacts
+*.pkl
+*.joblib
+*.h5
